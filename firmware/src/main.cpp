@@ -37,7 +37,7 @@
 
 #define PIN_LED_ACTIVATE 4
 
-const int lightLevelTrigger = 200;     // Note: found by trial and error. Light sensor value negatively correlates to light brightness.
+const int lightLevelTrigger = 185;     // Note: found by trial and error. Light sensor value negatively correlates to light brightness.
 const int numberOfSoundsAvailable = 9; // All sounds including reserved first sound.
 const int lengthOfFirstSoundMs = 7000; // play length of the first sound in milliseconds, add another second
 
@@ -150,6 +150,11 @@ void loop()
   if (buttonActivate.wasPressed())
   {
     activeState = !activeState;
+    if (activeState)
+    {
+      delayMillis = millis();
+      playSound();
+    }
   }
 
   // Turn on/off activate LED.
@@ -157,7 +162,7 @@ void loop()
 
   // Set delay.
   if (digitalRead(PIN_SELECTOR_1) == 0)
-    soundDelay = 2000; //random(30000, 900000);
+    soundDelay = random(30000, 900000);
   else if (digitalRead(PIN_SELECTOR_2) == 0)
     soundDelay = 30000;
   else if (digitalRead(PIN_SELECTOR_3) == 0)
@@ -195,6 +200,8 @@ void loop()
   if (digitalRead(PIN_SWITCH_SENSOR) == 0)
   {
     int lightReading = 1023 - analogRead(PIN_PHOTO_RESISTOR);
+
+    // Light reading mapped for easy debugging via UART.
     lightReading = map(lightReading, 0, 1023, 0, 255);
 
     if (previousLightReading >= lightLevelTrigger && lightReading < lightLevelTrigger)
@@ -203,6 +210,7 @@ void loop()
       playSoundOnModule(1);
       digitalWrite(PIN_LED_ACTIVATE, activeState);
       delay(lengthOfFirstSoundMs);
+      delayMillis = millis();
     }
 
     if (lightReading > lightLevelTrigger)
@@ -211,8 +219,8 @@ void loop()
     }
 
     // Calibration.
-    //Serial.write(lightReading);
-    //delay(1000);
+    // Serial.write(lightReading);
+    // delay(1000);
 
     previousLightReading = lightReading;
   }
