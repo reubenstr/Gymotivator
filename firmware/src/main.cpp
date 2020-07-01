@@ -69,6 +69,14 @@ void setVolume(unsigned int volume)
   Serial.write((0xAA + 0x13 + 0x01 + volume) & 0x00FF);
 }
 
+void stopPlayback()
+{
+  Serial.write(0xAA);
+  Serial.write(0x04);
+  Serial.write(0x00);
+  Serial.write(0xAE);
+}
+
 void playSound()
 {
   const int numberOfSoundsToCheck = 3;
@@ -134,7 +142,7 @@ void setup()
   digitalWrite(PIN_SELECTOR_3, HIGH);
   digitalWrite(PIN_SELECTOR_4, HIGH);
   digitalWrite(PIN_SELECTOR_5, HIGH);
-  //digitalWrite(PIN_SWITCH_SENSOR, HIGH);
+  digitalWrite(PIN_SWITCH_SENSOR, HIGH);
 
   buttonActivate.begin();
 }
@@ -206,19 +214,29 @@ void loop()
 
     if (previousLightReading >= lightLevelTrigger && lightReading < lightLevelTrigger)
     {
-      activeState = true;
-      playSoundOnModule(1);
-      digitalWrite(PIN_LED_ACTIVATE, activeState);
-      delay(lengthOfFirstSoundMs);
-      delayMillis = millis();
+      if (!activeState)
+      {
+        playSoundOnModule(1);
+        delayMillis = millis();
+        activeState = true;
+      }
     }
 
-    if (lightReading > lightLevelTrigger)
+    // Add delay before turning off the device when the lights dim.
+    static unsigned long delayedReactionMillis;
+    if (lightReading < lightLevelTrigger)
     {
-      activeState = false;
+      delayedReactionMillis = millis();
+    }
+    else
+    {
+      if ((delayedReactionMillis + 3000) < millis())
+      {
+        activeState = false;      
+      }
     }
 
-    // Calibration.
+    // Calibration data.
     // Serial.write(lightReading);
     // delay(1000);
 
