@@ -38,11 +38,10 @@
 #define PIN_LED_ACTIVATE 4
 
 const int lightLevelTrigger = 185;     // Note: found by trial and error. Light sensor value negatively correlates to light brightness.
-const int numberOfSoundsAvailable = 9; // All sounds including reserved first sound.
-const int lengthOfFirstSoundMs = 7000; // play length of the first sound in milliseconds, add another second
+const int numberOfSoundsAvailable = 9; // Number of all sounds including reserved first sound.
+const int lengthOfFirstSoundMs = 7000; // Play length of the first sound in milliseconds plus one more second.
 
-// https://github.com/JChristensen/JC_Button
-#include <JC_Button.h>
+#include <JC_Button.h>	// https://github.com/JChristensen/JC_Button
 Button buttonActivate(PIN_BUTTON_ACTIVE);
 
 // Play the sound by number.
